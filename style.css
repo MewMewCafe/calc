@@ -387,6 +387,7 @@ button:active {
 
 /* Bottom Navbar Buttons */
 .bottom-nav-bar {
+  border: none;
   display: flex;
   gap: 0.5em;
   background-color: transparent;
@@ -435,7 +436,6 @@ button:active {
 }
 
 .calc {
-  border: none;
   position: fixed;
   left: 280px;
   bottom: 2px;
