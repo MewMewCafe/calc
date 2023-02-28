@@ -33,6 +33,7 @@ let num2 = "";
 let operator = "";
 let result = "";
 let equalsPressed = false;
+let lastEquals = false;
 let originalWidth = calculator.offsetWidth;
 let originalHeight = calculator.offsetHeight;
 let originalLeft = calculator.offsetLeft;
@@ -92,7 +93,6 @@ function operands(e) {
 function operators(e) {
   operator = e.target.textContent;
   num1 = result || num1;
-  num2 = "";
   displayResult(`${num1} ${operator}`);
   smallDisplay(`${operator}`);
 }
@@ -120,6 +120,7 @@ function calculate() {
     default:
       result = "";
   }
+
   // Displays the result, updates the smaller display, sets result as new num1 and resets num2.
   displayResult(result);
   smallDisplayText = `${n1} ${operator} ${n2} =`;
@@ -156,33 +157,46 @@ buttons.forEach((button) => {
 
 // Function for operator button press
 function operatorButtons(e) {
+  // Check if equals button was just pressed
+  if (equalsPressed) {
+    num2 = "";
+    result = "";
+    equalsPressed = false;
+  }
   // Reuse the last operator to keep recalculating the result for repeat operators press.
-  if (previousValue && operator && num2) {
-    if (equalsPressed) {
-      num1 = result;
-      num2 = null;
-      equalsPressed = false;
-    }
+  if (previousValue && operator && num2 && !lastEquals) {
     result = calculate();
     currentValue = result;
     operator = e.target.innerText;
   } else {
-    previousValue = +display.textContent;
+    // Check if = was pressed last
+    if (equalsPressed) {
+      num1 = display.textContent;
+      equalsPressed = false;
+    } else {
+      previousValue = display.textContent;
+    }
     operator = e.target.innerText;
   }
   // Display the previous value and operator in the small display
   smallDisplay(`${previousValue} ${operator}`);
+  lastEquals = false;
 }
 
 // Function for equal button press
 function equalButton() {
   let lastNum2 = num2;
-  result = calculate();
-  // Calculate the result and display it
-  result = calculate();
-  display.textContent = result;
-  smallDisplay(`${previousValue} ${operator} ${num2} =`);
+  if (num2 === "") {
+    // If there is no second operand, the result should be the first operand
+    result = +num1;
+  } else {
+    result = calculate();
+  }
+  num1 = result;
+  num2 = "";
   equalsPressed = true;
+  lastEquals = true;
+
   // Ability to recalculate last operation with pressing = alone
   if (!num2) num2 = lastNum2;
 }
@@ -374,7 +388,6 @@ function mousedown(e) {
   }
 }
 
-// Menu Right Click Simulator
 document.addEventListener("contextmenu", (event) => {
   // Show the menu at the position of the right-click
   menu.style.display = "block";
